@@ -40,7 +40,7 @@ jobs:
           key:      ${{ secrets.EC2_SSH_KEY }}
           script: |
             export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-            cd ~/lab8-cicd
+            cd ~/lab8-cicd/lab8
             docker-compose pull
             docker-compose down
             docker-compose up -d
