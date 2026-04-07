@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  # ---------- Node.js application ----------
+  app:
+    build: .                          # built from the local Dockerfile
+    image: mohamed814/lab8-app:latest
+    ports:
+      - "3000:3000"
+    environment:
+      MODE: production
+      # "db" is the service name below – Docker's internal DNS resolves it
+      DATABASE_URL: postgres://lab8user:lab8pass@db:5432/lab8db
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ---------- PostgreSQL database ----------
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER:     lab8user
+      POSTGRES_PASSWORD: lab8pass
+      POSTGRES_DB:       lab8db
+    volumes:
+      # Seed script executed once on first start
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # Named volume for persistent data
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab8user -d lab8db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  pg_data:
